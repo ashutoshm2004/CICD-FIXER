@@ -6,6 +6,5 @@ build
 coverage
 *.log
 .next
-node_modules
-dist
-build
+__pycache__
+*.pyc

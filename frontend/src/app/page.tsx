@@ -18,6 +18,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 async function getStats(workflows: WorkflowSummary[]) {
+
   const total = workflows.length;
   const success = workflows.filter((w) => w.status === "success").length;
   const failed = workflows.filter((w) => w.status === "failed").length;
@@ -31,6 +32,7 @@ async function getStats(workflows: WorkflowSummary[]) {
 }
 
 export default async function DashboardPage() {
+
   let workflows: WorkflowSummary[] = [];
   try {
     workflows = await listWorkflows(20);
