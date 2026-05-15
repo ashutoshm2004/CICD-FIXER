@@ -4,8 +4,7 @@ backend/.env
 dist
 build
 coverage
-*.log.next
+*.log
+.next
 __pycache__
 *.pyc
-node_modules
-.env

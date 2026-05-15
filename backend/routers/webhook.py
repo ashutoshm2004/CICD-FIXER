@@ -43,7 +43,6 @@ async def _process_webhook(workflow_id: str, state: WorkflowState, db: Session):
     """Background task: runs the full multi-agent pipeline."""
     logger.info(f"[Webhook] Starting pipeline for workflow {workflow_id}")
 
-    # Update DB: running
     db_workflow = db.query(Workflow).filter(Workflow.id == workflow_id).first()
     if db_workflow:
         db_workflow.status = "running"
@@ -53,7 +52,6 @@ async def _process_webhook(workflow_id: str, state: WorkflowState, db: Session):
     try:
         final_state = await run_workflow(state)
 
-        # Update DB with results
         db_workflow = db.query(Workflow).filter(Workflow.id == workflow_id).first()
         if db_workflow:
             db_workflow.status = final_state.get("final_status", "failed")
@@ -96,17 +94,14 @@ async def github_webhook(
     signature = request.headers.get("X-Hub-Signature-256", "")
     event_type = request.headers.get("X-GitHub-Event", "")
 
-    # Verify signature
     if not _verify_signature(body, signature):
         raise HTTPException(status_code=403, detail="Invalid webhook signature")
 
-    # Parse payload
     try:
         payload = json.loads(body)
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid JSON payload")
 
-    # Only process workflow_run failures
     if event_type != "workflow_run":
         return Response(content="OK", status_code=200)
 
@@ -117,7 +112,6 @@ async def github_webhook(
     if status != "completed" or conclusion != "failure":
         return Response(content="Not a failure event", status_code=200)
 
-    # Extract repository info
     repo = payload.get("repository", {})
     repo_name = repo.get("full_name", "unknown/repo")
     repo_url = repo.get("html_url", "")
@@ -126,7 +120,6 @@ async def github_webhook(
     commit_sha = workflow_run.get("head_sha", "")
     run_id = str(workflow_run.get("id", ""))
 
-    # Create workflow record
     workflow_id = str(uuid.uuid4())
     db_workflow = Workflow(
         id=workflow_id,
@@ -141,7 +134,6 @@ async def github_webhook(
     db.add(db_workflow)
     db.commit()
 
-    # Build initial state
     initial_state: WorkflowState = {
         "workflow_id": workflow_id,
         "repo_name": repo_name,
@@ -154,6 +146,10 @@ async def github_webhook(
         "raw_logs": "",
         "workflow_run_id": run_id,
         "github_run_url": workflow_run.get("html_url", ""),
+        # Use the global server token for webhook-triggered runs.
+        # The webhook itself proves repository access — the server token
+        # is used to fetch logs and create PRs.
+        "github_token": settings.github_token,
         "parsed_failure": None,
         "proposed_fix": None,
         "validation_result": None,
@@ -169,7 +165,6 @@ async def github_webhook(
         "error": None,
     }
 
-    # Kick off background pipeline
     background_tasks.add_task(_process_webhook, workflow_id, initial_state, db)
 
     logger.info(f"[Webhook] Accepted workflow_run failure for {repo_name}, workflow_id={workflow_id}")

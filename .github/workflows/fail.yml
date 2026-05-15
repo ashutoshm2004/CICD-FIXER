@@ -1,0 +1,17 @@
+name: Intentional Failure
+
+on:
+  push:
+
+jobs:
+  broken-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Force failure
+        run: |
+          echo "This workflow will fail"
+          exit 1
