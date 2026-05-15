@@ -34,18 +34,52 @@ def intake_agent(state: WorkflowState) -> WorkflowState:
 
     try:
         # In demo mode, logs are already populated from the fixture
+        # Logs already available
         if state.get("raw_logs"):
-            logger.info("[IntakeAgent] Using pre-loaded logs (demo/fixture mode)")
-        else:
-            # Fetch logs from GitHub API
-            github = GitHubTool()
-            logs = github.get_workflow_logs(
-                owner=state["repo_owner"],
-                repo=state["repo_name"].split("/")[-1],
-                run_id=state.get("workflow_run_id", ""),
+            logger.info(
+                "[IntakeAgent] "
+                "Using pre-loaded logs"
             )
-            new_state["raw_logs"] = logs
 
+        # Local repository mode
+        elif not state.get(
+            "workflow_run_id"
+        ):
+            logger.info(
+                "[IntakeAgent] "
+                "No GitHub workflow run. "
+                "Using local execution "
+                "mode."
+            )
+
+            new_state[
+                "raw_logs"
+            ] = ""
+
+        # GitHub Actions mode
+        else:
+            github = GitHubTool()
+
+            logs = (
+                github.get_workflow_logs(
+                    owner=
+                        state[
+                            "repo_owner"
+                        ],
+                    repo=
+                        state[
+                            "repo_name"
+                        ].split("/")[-1],
+                    run_id=
+                        state[
+                            "workflow_run_id"
+                        ],
+                )
+            )
+
+            new_state[
+                "raw_logs"
+            ] = logs
         # Parse the logs to extract key signals
         parser = LogParser()
         parsed = parser.extract_signals(new_state["raw_logs"])

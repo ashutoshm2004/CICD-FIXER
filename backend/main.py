@@ -24,7 +24,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-
+from routers.github import router as github_router
 # ── Ensure the app directory is on sys.path when running inside Docker ──────
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -103,6 +103,7 @@ app.add_middleware(
 app.include_router(webhook_router)
 app.include_router(workflows_router)
 app.include_router(demo_router)
+app.include_router(github_router)
 
 
 # ── Core endpoints ────────────────────────────────────────────────────────────

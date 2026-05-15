@@ -67,6 +67,10 @@ class WorkflowState(TypedDict):
     pull_request_url: Optional[str]
     github_comment_url: Optional[str]
     workspace_path: Optional[str]
+    project_type: Optional[str]
+    entry_file: Optional[str]
+    execution_error: Optional[str]
+    modified_files: Optional[List[str]]
 
     # Terminal state
     final_status: Optional[str]  # success | failed | partial

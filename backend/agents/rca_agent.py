@@ -207,10 +207,49 @@ def rca_agent(state: WorkflowState) -> WorkflowState:
     logger.info(f"[RCAAgent] Starting for workflow {state['workflow_id']}")
     new_state = {**state, "current_agent": "rca"}
 
-    logs = state.get("raw_logs", "")
+    logs = (
+        state.get(
+            "raw_logs",
+            ""
+        )
+        or
+        state.get(
+            "execution_error",
+            ""
+        )
+    )
+
+    # Manual repo mode:
+    # execution error not
+    # available yet.
     if not logs:
-        new_state["error"] = "No logs available for RCA"
-        new_state["final_status"] = "failed"
+        logger.info(
+            "[RCAAgent] "
+            "No logs yet. "
+            "Skipping RCA "
+            "for now."
+        )
+
+        new_state[
+            "parsed_failure"
+        ] = {
+            "failure_type":
+                "unknown",
+            "language":
+                "generic",
+            "affected_files":
+                [],
+            "error_messages":
+                [],
+            "confidence":
+                0.0,
+            "reasoning":
+                (
+                    "Waiting for "
+                    "execution error"
+                ),
+        }
+
         return new_state
 
     try:

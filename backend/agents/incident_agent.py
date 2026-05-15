@@ -22,9 +22,9 @@ logger = logging.getLogger(__name__)
 
 def _generate_incident_report(state: WorkflowState) -> IncidentReport:
     """Generate a structured incident report from workflow state."""
-    classification = state.get("parsed_failure", {})
-    fix = state.get("proposed_fix", {})
-    validation = state.get("validation_result", {})
+    classification = (state.get("parsed_failure")or {})
+    fix = (state.get("proposed_fix")or {})
+    validation = (state.get("validation_result")or {})
     messages = state.get("agent_messages", [])
     retry_count = state.get("retry_count", 0)
 
@@ -130,7 +130,7 @@ def _try_create_pr(state: WorkflowState, report: IncidentReport) -> tuple[str | 
 
     try:
         github = GitHubTool()
-        fix = state.get("proposed_fix", {})
+        fix = (state.get("proposed_fix") or {})
 
         # Create branch name
         branch_name = f"autofix/{state['workflow_id'][:8]}-{state.get('parsed_failure', {}).get('failure_type', 'unknown')}"

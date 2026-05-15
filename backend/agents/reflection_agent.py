@@ -24,8 +24,8 @@ MAX_RETRIES = 2
 def _analyze_failure(state: WorkflowState) -> str:
     """Analyze why the validation failed and suggest a different approach."""
     validation = state.get("validation_result", {})
-    fix = state.get("proposed_fix", {})
-    classification = state.get("parsed_failure", {})
+    fix = (state.get("proposed_fix")or {})
+    classification = (state.get("parsed_failure")or {})
 
     failed_commands = [
         r for r in validation.get("commands_run", [])
@@ -94,22 +94,60 @@ Return ONLY the suggestion text, no JSON, no markdown."""
         return "Try alternative approach: review the error output manually and adjust the fix accordingly."
 
 
-def should_retry(state: WorkflowState) -> str:
+def should_retry(
+    state: WorkflowState
+) -> str:
     """
-    LangGraph conditional edge function.
-    Returns "retry" or "incident_report".
+    LangGraph conditional
+    routing function.
+
+    Returns:
+    - reflection
+    - incident_report
     """
-    validation = state.get("validation_result", {})
-    retry_count = state.get("retry_count", 0)
 
-    if validation.get("passed", False):
-        return "incident_report"
+    validation = state.get(
+        "validation_result",
+        {}
+    )
 
-    if retry_count >= MAX_RETRIES:
-        logger.info(f"[ReflectionAgent] Max retries ({MAX_RETRIES}) reached, going to incident report")
-        return "incident_report"
+    logger.info(
+        f"[ReflectionAgent] "
+        f"validation={validation}"
+    )
 
-    return "retry"
+    retry_count = state.get(
+        "retry_count",
+        0,
+    )
+
+    # Success
+    if validation.get(
+        "passed",
+        False,
+    ):
+        return (
+            "incident_report"
+        )
+
+    # Retry limit reached
+    if (
+        retry_count
+        >= MAX_RETRIES
+    ):
+        logger.info(
+            f"[ReflectionAgent] "
+            f"Max retries "
+            f"({MAX_RETRIES}) "
+            f"reached"
+        )
+
+        return (
+            "incident_report"
+        )
+
+    # Retry path
+    return "reflection"
 
 
 def reflection_agent(state: WorkflowState) -> WorkflowState:

@@ -11,6 +11,7 @@ Wraps GitHub REST API v3 for:
 import httpx
 import logging
 from config import settings
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -143,3 +144,80 @@ class GitHubTool:
         except Exception as e:
             logger.error(f"[GitHubTool] get_file_contents error: {e}")
             return ""
+
+    def get_latest_failed_run(
+        self,
+        owner: str,
+        repo: str,
+        branch: str = "main",
+    ):
+        url = (
+            f"https://api.github.com/repos/"
+            f"{owner}/{repo}/actions/runs"
+        )
+
+        response = requests.get(
+            url,
+            headers=self.headers,
+            params={
+                "branch": branch,
+                "status": "completed",
+                "per_page": 10,
+            },
+        )
+
+        response.raise_for_status()
+
+        runs = response.json().get(
+            "workflow_runs",
+            [],
+        )
+
+        failed_runs = [
+            r
+            for r in runs
+            if r["conclusion"] == "failure"
+        ]
+
+        return failed_runs[0] if failed_runs else None
+
+
+    def get_workflow_logs(
+        self,
+        owner: str,
+        repo: str,
+        run_id: int,
+    ):
+        jobs_url = (
+            f"https://api.github.com/repos/"
+            f"{owner}/{repo}/actions/runs/"
+            f"{run_id}/jobs"
+        )
+
+        response = requests.get(
+            jobs_url,
+            headers=self.headers,
+        )
+
+        response.raise_for_status()
+
+        jobs = response.json().get(
+            "jobs",
+            [],
+        )
+
+        logs = []
+
+        for job in jobs:
+            logs.append(
+                f"JOB: {job['name']}"
+            )
+
+            for step in job.get("steps", []):
+                if step["conclusion"] == "failure":
+                    logs.append(
+                        f"FAILED STEP: "
+                        f"{step['name']}"
+                    )
+
+        return "\n".join(logs)

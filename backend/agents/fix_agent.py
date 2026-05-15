@@ -107,32 +107,234 @@ def _fix_dep_conflict(state: WorkflowState) -> ProposedFix:
         }
 
 
-def _fix_import_error(state: WorkflowState) -> ProposedFix:
-    """Add missing Python module to requirements.txt."""
-    classification = state["parsed_failure"]
-    error_msgs = classification.get("error_messages", [])
+def _fix_import_error(
+    state: WorkflowState
+) -> ProposedFix:
+    """
+    Fix missing imports intelligently.
 
-    # Extract module name
-    module_name = None
-    for msg in error_msgs:
-        m = re.search(r"No module named '([\w.]+)'", msg)
-        if m:
-            module_name = m.group(1).split(".")[0]
-            break
+    Handles:
+    - typo imports
+    - missing packages
+    - requirements updates
+    """
+
+    from pathlib import Path
+
+    validation = (
+        state.get(
+            "validation_result",
+            {}
+        )
+    )
+
+    commands = (
+        validation.get(
+            "commands_run",
+            []
+        )
+    )
+
+    stderr = ""
+
+    if commands:
+        stderr = commands[
+            0
+        ].get(
+            "stderr",
+            ""
+        )
+
+    # Extract missing module
+    match = re.search(
+        r"No module named ['\"](.+?)['\"]",
+        stderr,
+    )
+
+    module_name = (
+        match.group(1)
+        if match
+        else None
+    )
 
     if not module_name:
-        module_name = "missing_module"
+        module_name = (
+            "missing_module"
+        )
+
+    logger.info(
+        f"[FixAgent] "
+        f"Missing module: "
+        f"{module_name}"
+    )
+
+    # Common typo corrections
+    typo_map = {
+        "medialpipe":
+            "mediapipe",
+        "cv":
+            "opencv-python",
+        "pil":
+            "Pillow",
+        "sklearn":
+            "scikit-learn",
+        "np":
+            "numpy",
+    }
+
+    workspace = Path(
+        state.get(
+            "workspace_path",
+            ""
+        )
+    )
+
+    patches = []
+    fixed = False
+
+    # Try typo correction first
+    if module_name in typo_map:
+
+        corrected = (
+            typo_map[
+                module_name
+            ]
+        )
+
+        for py_file in (
+            workspace.rglob(
+                "*.py"
+            )
+        ):
+
+            try:
+                text = (
+                    py_file
+                    .read_text(
+                        encoding=
+                        "utf-8"
+                    )
+                )
+
+                if (
+                    module_name
+                    in text
+                ):
+
+                    updated = (
+                        text.replace(
+                            module_name,
+                            corrected
+                        )
+                    )
+
+                    py_file.write_text(
+                        updated,
+                        encoding=
+                        "utf-8"
+                    )
+
+                    logger.info(
+                        "[FixAgent] "
+                        f"Fixed typo "
+                        f"{module_name}"
+                        f" → "
+                        f"{corrected}"
+                        f" in "
+                        f"{py_file}"
+                    )
+
+                    patches.append({
+                        "file":
+                            str(
+                                py_file
+                            ),
+                        "action":
+                            "replace",
+                        "explanation":
+                            f"Corrected typo: "
+                            f"{module_name}"
+                            f" → "
+                            f"{corrected}",
+                    })
+
+                    fixed = True
+
+            except Exception as e:
+                logger.warning(
+                    f"[FixAgent] "
+                    f"Could not "
+                    f"modify "
+                    f"{py_file}: "
+                    f"{e}"
+                )
+
+    # Fallback:
+    # add dependency
+    if (
+        not fixed
+        and module_name
+    ):
+
+        req_file = (
+            workspace /
+            "requirements.txt"
+        )
+
+        if (
+            not req_file
+            .exists()
+        ):
+            req_file.touch()
+
+        with open(
+            req_file,
+            "a",
+            encoding=
+            "utf-8",
+        ) as f:
+            f.write(
+                f"\n"
+                f"{module_name}"
+                f"\n"
+            )
+
+        logger.info(
+            "[FixAgent] "
+            f"Added "
+            f"{module_name} "
+            f"to requirements"
+        )
+
+        patches.append({
+            "file":
+                "requirements.txt",
+            "action":
+                "append",
+            "content":
+                module_name,
+            "explanation":
+                f"Added "
+                f"missing "
+                f"dependency "
+                f"{module_name}",
+        })
 
     return {
-        "strategy": f"Add '{module_name}' to requirements.txt",
-        "patches": [{
-            "file": "requirements.txt",
-            "action": "append",
-            "content": f"\n{module_name}\n",
-            "explanation": f"Package '{module_name}' is imported but not in requirements.txt",
-        }],
-        "commands_to_run": [f"pip install {module_name}"],
-        "explanation": f"Python module '{module_name}' is used in the codebase but missing from requirements.txt.",
+        "strategy":
+            f"Fix import "
+            f"error for "
+            f"{module_name}",
+        "patches":
+            patches,
+        "commands_to_run": [
+            "pip install -r requirements.txt"
+        ],
+        "explanation":
+            f"Resolved "
+            f"import issue "
+            f"for "
+            f"{module_name}",
     }
 
 
@@ -252,7 +454,7 @@ def _llm_generate_fix(state: WorkflowState) -> ProposedFix:
             raise ValueError("No Gemini API key")
 
         genai.configure(api_key=settings.gemini_api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel(settings.llm_model)
 
         classification = state.get("parsed_failure", {})
         logs = state.get("raw_logs", "")[-3000:]
