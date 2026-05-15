@@ -1,80 +1,265 @@
-# 🤖 Autonomous CI/CD Failure Fixer
 
-> **An AI DevOps Engineer that autonomously diagnoses, fixes, validates, and recovers failed software deployments.**
+# 🚀 Autonomous CI/CD Failure Fixer
+
+<div align="center">
+
+### **An AI DevOps Engineer that autonomously diagnoses, fixes, validates, and recovers failed CI/CD deployments**
+
+### 🏆 **Built for Scaler School of Technology — Ascent ANVIL Hackathon 2026**
+
+[![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Multi--Agent-purple)](https://www.langchain.com/langgraph)
+[![Gemini](https://img.shields.io/badge/Gemini-Flash-orange)](https://aistudio.google.com/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)](https://www.docker.com/)
+[![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?logo=sqlite)](https://sqlite.org/)
+
+### ⚡ Detect → Diagnose → Fix → Validate → Recover
+
+*Transform failed CI/CD pipelines into autonomous recovery workflows with AI-powered DevOps intelligence.*
+
+</div>
 
 ---
 
-## What it does
+# 📌 Overview
 
-When a GitHub Actions workflow fails, this system:
+Modern software deployments fail constantly.
 
-1. **Receives** the webhook (or you trigger a demo scenario)
-2. **Fetches** the full failure logs from GitHub
-3. **Classifies** the root cause — dependency conflict, missing env var, Docker failure, TypeScript error, failing tests
-4. **Generates** concrete file patches (`requirements.txt`, `Dockerfile`, `package.json`, `.env.example`, etc.)
-5. **Validates** the fix by running real commands (`pip install`, `npm build`, `pytest`, `docker build`)
-6. **Retries** up to 2× with a Reflection agent that analyzes what went wrong
-7. **Creates** a GitHub PR + posts a comment with the fix
-8. **Generates** a full incident report with timeline, evidence, and remediation steps
+Engineering teams spend countless hours manually debugging:
 
-## Architecture
+- ❌ Dependency conflicts  
+- ❌ Failed tests  
+- ❌ Missing environment variables  
+- ❌ Docker build failures  
+- ❌ TypeScript compilation issues  
+- ❌ Broken imports & configurations  
+- ❌ Package mismatches  
+- ❌ CI/CD pipeline failures  
 
-```
-GitHub Webhook
-     │
-     ▼
-┌─────────────────────────────────────────────────┐
-│                 FastAPI Backend                  │
-│                                                 │
-│  ┌──────────┐  ┌─────┐  ┌──────────┐           │
-│  │  Intake  │→ │ RCA │→ │  Fix Gen │           │
-│  │  Agent   │  │Agent│  │  Agent   │           │
-│  └──────────┘  └─────┘  └──────────┘           │
-│                               │                 │
-│                               ▼                 │
-│  ┌────────────┐  ┌──────────────────┐           │
-│  │ Reflection │← │   Validation     │           │
-│  │   Agent   │  │     Agent        │           │
-│  └────────────┘  └──────────────────┘           │
-│        │                  │ (pass)               │
-│        └──────────────────▼                     │
-│                   ┌───────────────┐             │
-│                   │    Incident   │             │
-│                   │ Report Agent  │             │
-│                   └───────────────┘             │
-│                                                 │
-│  Orchestrated by: LangGraph                     │
-│  Database: SQLite                               │
-└─────────────────────────────────────────────────┘
-     │
-     ▼
-Next.js Dashboard (port 3000)
-```
+## Autonomous CI/CD Failure Fixer solves this problem end-to-end.
 
-## Quick Start
+When a deployment fails, the system autonomously:
 
-### 1. Clone & configure
+1. **Receives** a GitHub webhook (or demo trigger)  
+2. **Fetches** CI/CD failure logs  
+3. **Classifies** the root cause  
+4. **Generates** concrete file patches  
+5. **Validates** fixes using real commands  
+6. **Retries intelligently** using a Reflection Agent  
+7. **Creates GitHub Pull Requests automatically**  
+8. **Generates detailed incident reports**
+
+> Think of it as an **AI DevOps Engineer** for failed deployments.
+
+---
+
+# ✨ Key Features
+
+### 🤖 True Multi-Agent Architecture
+Specialized agents collaborate autonomously instead of relying on a single LLM prompt chain.
+
+### 🔍 Root Cause Analysis
+Detects and classifies failures:
+
+- Dependency mismatches
+- Missing environment variables
+- Docker build issues
+- TypeScript errors
+- Failing tests
+- Broken imports
+
+### 🛠 Autonomous Fix Generation
+Automatically patches:
+
+- `requirements.txt`
+- `package.json`
+- `Dockerfile`
+- `.env.example`
+- Config files
+- Import paths
+
+### ✅ Deterministic Validation
+Runs real commands:
 
 ```bash
-git clone <repo>
-cd cicd-failure-fixer
-cp .env.example .env
-# Edit .env — at minimum set GEMINI_API_KEY
+pytest
+npm install
+npm build
+npm test
+docker build
+flake8
+eslint
 ```
 
-### 2. Run with Docker Compose
+### 🔁 Reflection & Retry Loop
+Failed fixes are analyzed and retried intelligently (max 2 retries).
+
+### 📊 Incident Reporting
+Generates:
+
+- Root Cause Analysis (RCA)
+- Timeline
+- Confidence Score
+- Validation Evidence
+- Remediation Summary
+
+### 🐳 Local-First & Completely Free
+- No AWS required
+- No Kubernetes required
+- No paid infrastructure
+- Fully Dockerized
+- Replayable deterministic demo mode
+
+---
+
+# 🏗 System Architecture
+
+```mermaid
+flowchart TD
+
+A[GitHub Webhook / Demo Trigger] --> B[Intake Agent]
+
+B --> C[RCA Agent]
+C --> D[Fix Generation Agent]
+D --> E[Validation Agent]
+
+E -->|Pass| F[Incident Report Agent]
+E -->|Fail| G[Reflection Agent]
+
+G --> D
+
+F --> H[GitHub PR Creation]
+F --> I[Incident Report]
+F --> J[Dashboard Update]
+
+subgraph Backend [FastAPI Backend]
+B
+C
+D
+E
+G
+F
+end
+
+subgraph Storage
+K[(SQLite Database)]
+end
+
+Backend --> K
+
+subgraph Frontend
+L[Next.js Dashboard]
+end
+
+J --> L
+```
+
+---
+
+# 🧠 Multi-Agent Workflow
+
+```mermaid
+sequenceDiagram
+
+participant GitHub
+participant Intake
+participant RCA
+participant Fixer
+participant Validator
+participant Reflection
+participant Incident
+
+GitHub->>Intake: Workflow Failed Webhook
+Intake->>RCA: Failure Context + Logs
+RCA->>Fixer: Root Cause + Confidence
+Fixer->>Validator: Generated Patch
+
+alt Validation Passed
+Validator->>Incident: Success Logs
+Incident->>GitHub: Create PR + Comment
+Incident->>GitHub: Incident Report
+else Validation Failed
+Validator->>Reflection: Failure Reason
+Reflection->>Fixer: Improved Strategy
+end
+```
+
+---
+
+# 🛠 Tech Stack
+
+| Layer | Technology |
+|--------|------------|
+| Frontend | Next.js 14 + Tailwind CSS |
+| Backend | FastAPI |
+| Orchestration | LangGraph |
+| LLM | Gemini Flash + OpenRouter Fallback |
+| Database | SQLite |
+| Containerization | Docker Compose |
+| CI/CD Integration | GitHub API + Webhooks |
+
+---
+
+# 🚀 Quick Start
+
+## 1️⃣ Clone Repository
+
+```bash
+git clone <repo-url>
+cd cicd-failure-fixer
+```
+
+---
+
+## 2️⃣ Configure Environment
+
+```bash
+cp .env.example .env
+```
+
+Add required variables:
+
+```env
+GEMINI_API_KEY=your_key_here
+OPENROUTER_API_KEY=optional
+GITHUB_TOKEN=optional
+GITHUB_WEBHOOK_SECRET=optional
+DEMO_MODE=true
+```
+
+---
+
+## 3️⃣ Run with Docker Compose
 
 ```bash
 docker compose up --build
 ```
 
-- **Backend API:** http://localhost:8000
-- **Frontend Dashboard:** http://localhost:3000
-- **API Docs:** http://localhost:8000/docs
+### Services
 
-### 3. Run a demo (no GitHub needed)
+| Service | URL |
+|---------|-----|
+| Frontend Dashboard | http://localhost:3000 |
+| Backend API | http://localhost:8000 |
+| API Docs | http://localhost:8000/docs |
 
-Open http://localhost:3000/demo and click any scenario, or:
+---
+
+# 🎬 Demo Scenarios
+
+The project includes **5 intentionally broken repositories** for deterministic demos.
+
+| Scenario | Failure Type | Difficulty |
+|----------|--------------|------------|
+| `env_missing` | Missing `DATABASE_URL` | 🟢 Easy |
+| `dep_conflict` | Package dependency mismatch | 🟡 Medium |
+| `docker_build` | Broken Docker build | 🟡 Medium |
+| `ts_error` | TypeScript compilation issue | 🔴 Hard |
+| `test_failure` | Failing tests | 🔴 Hard |
+
+### Trigger Demo
 
 ```bash
 curl -X POST http://localhost:8000/demo/trigger/env_missing
@@ -84,42 +269,19 @@ curl -X POST http://localhost:8000/demo/trigger/ts_error
 curl -X POST http://localhost:8000/demo/trigger/test_failure
 ```
 
-Then open http://localhost:3000 to watch the agents run.
+Then open:
 
-## Demo Scenarios
-
-| Key | Failure | Difficulty |
-|-----|---------|------------|
-| `env_missing` | `DATABASE_URL` not set → Python `KeyError` | Easy |
-| `dep_conflict` | `numpy==1.24.0` conflicts with `torch>=2.0` | Medium |
-| `docker_build` | `COPY config/production.yaml` — file doesn't exist | Medium |
-| `ts_error` | `UserRecord[]` not assignable to `Record<string,unknown>[]` | Hard |
-| `test_failure` | pytest fails — fee calculation changed after refactor | Hard |
-
-## Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `GEMINI_API_KEY` | Recommended | Google Gemini Flash API key |
-| `OPENROUTER_API_KEY` | Optional | Fallback LLM provider |
-| `GITHUB_TOKEN` | Optional | For real webhook mode (PR creation) |
-| `GITHUB_WEBHOOK_SECRET` | Optional | Webhook signature verification |
-| `DEMO_MODE` | — | Default `true` — skips signature check |
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Orchestration | LangGraph |
-| Backend | FastAPI + SQLite |
-| Frontend | Next.js 14 + Tailwind CSS |
-| LLM | Gemini 1.5 Flash (+ OpenRouter fallback) |
-| Containerisation | Docker Compose |
-| GitHub | REST API v3 |
-
-## Project Structure
-
+```text
+http://localhost:3000
 ```
+
+to watch the agents collaborate.
+
+---
+
+# 📂 Project Structure
+
+```text
 cicd-failure-fixer/
 ├── backend/
 │   ├── main.py                  # FastAPI app entry point
@@ -154,22 +316,144 @@ cicd-failure-fixer/
 └── .env.example
 ```
 
-## Agents
+---
 
-### 1. Intake Agent
-Fetches CI logs from GitHub API (or uses pre-loaded fixture in demo mode). Writes logs to workspace. Extracts initial signals.
+# 🤖 Agent System
 
-### 2. RCA Agent
-Uses deterministic regex patterns first (zero LLM tokens), falls back to Gemini for complex/unknown failures. Outputs `FailureClassification` with confidence score.
+## 1. Intake Agent
+Receives GitHub webhook events and extracts failure logs.
 
-### 3. Fix Generation Agent
-Maps failure type → deterministic fix strategy. For simple cases (missing env var, version pins) no LLM needed. For complex cases (TypeScript, test logic) uses Gemini.
+## 2. RCA Agent
+Performs root cause analysis using deterministic parsing + LLM reasoning.
 
-### 4. Validation Agent
-Runs real shell commands in a sandboxed workspace. No LLM involved. Pure deterministic pass/fail.
+## 3. Fix Generation Agent
+Generates patches for dependencies, configs, Docker files, and source code.
 
-### 5. Reflection Agent
-If validation fails and retries remain, analyzes what went wrong and produces an improved fix strategy. Max 2 retries enforced.
+## 4. Validation Agent
+Runs deterministic checks:
 
-### 6. Incident Report Agent
-Generates structured markdown report, GitHub PR description, and posts a comment. Works in demo mode without a real GitHub token.
+```bash
+pytest
+npm build
+docker build
+```
+
+## 5. Reflection Agent
+Retries failed fixes intelligently.
+
+## 6. Incident Report Agent
+Creates:
+
+- GitHub PR Summary
+- Incident Timeline
+- Root Cause Report
+- Validation Evidence
+
+---
+
+# 🔄 Workflow Lifecycle
+
+```mermaid
+graph LR
+
+A[CI/CD Failure] --> B[Log Collection]
+B --> C[Root Cause Analysis]
+C --> D[Fix Generation]
+D --> E[Validation]
+
+E -->|Success| F[PR Creation]
+E -->|Failure| G[Reflection]
+
+G --> D
+F --> H[Incident Report]
+```
+
+---
+
+# 🌟 Why This Project Matters
+
+CI/CD failures cost engineering teams:
+
+- ⏳ Engineering time  
+- 💰 Productivity loss  
+- 🚀 Slower release velocity  
+- 😵 Developer frustration  
+
+This project demonstrates how **autonomous AI systems can become engineering copilots**, reducing repetitive debugging work and accelerating deployments.
+
+---
+
+# 🛣 Future Roadmap
+
+- [ ] Real GitHub PR creation
+- [ ] Slack/Discord incident alerts
+- [ ] Kubernetes deployment diagnostics
+- [ ] Historical incident memory
+- [ ] Autonomous rollback support
+- [ ] Multi-repository orchestration
+
+---
+
+# 🏆 Hackathon Details
+
+**Event:** Scaler School of Technology — Ascent ANVIL Hackathon 2026  
+**Track:** Multi-Agent Autonomous Pipeline  
+**Category:** Enterprise DevOps Automation using AI Agents
+
+---
+
+# 🤝 Contributing
+
+Contributions, ideas, and improvements are welcome.
+
+```bash
+fork → clone → branch → commit → PR
+```
+
+---
+
+# 👨‍💻 Team
+
+<div align="center">
+
+<table>
+<tr>
+<td align="center" width="50%">
+
+### **Ashutosh Kshitij Mishra**
+
+<a href="https://www.linkedin.com/in/ashutoshm04/">
+  <img src="https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin" />
+</a>
+<a href="https://github.com/ashutoshm2004">
+  <img src="https://img.shields.io/badge/GitHub-Follow-black?logo=github" />
+</a>
+
+</td>
+
+<td align="center" width="50%">
+
+### **Aditya Kumar Pandey**
+
+<a href="https://www.linkedin.com/in/aditya-kumar-pandey-7915a7347/">
+  <img src="https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin" />
+</a>
+<a href="https://github.com/adityakumarpandey1">
+  <img src="https://img.shields.io/badge/GitHub-Follow-black?logo=github" />
+</a>
+
+</td>
+</tr>
+</table>
+
+</div>
+---
+
+# 📜 License
+
+MIT License © 2026
+
+---
+
+
+
