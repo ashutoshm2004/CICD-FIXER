@@ -1,9 +1,9 @@
 {
   "pages": {
-    "/workflows/[id]/page": [
+    "/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/workflows/[id]/page.js"
+      "static/chunks/app/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
@@ -16,15 +16,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/demo/page.js"
     ],
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
-    ],
     "/workflows/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/workflows/page.js"
+    ],
+    "/workflows/[id]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/workflows/[id]/page.js"
     ]
   }
 }

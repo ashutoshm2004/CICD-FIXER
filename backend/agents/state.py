@@ -43,13 +43,18 @@ class WorkflowState(TypedDict):
     repo_owner: str
     repo_branch: str
     commit_sha: str
-    trigger_event: str
+    trigger_event: str          # "demo" | "real" | "webhook"
     scenario_name: Optional[str]
 
     # Raw data
     raw_logs: str
     workflow_run_id: Optional[str]
     github_run_url: Optional[str]
+
+    # NEW: per-request GitHub token for real-repo mode
+    # Stored in state so it flows through the agent graph without
+    # touching the global settings token.
+    github_token: Optional[str]
 
     # Agent outputs
     parsed_failure: Optional[FailureClassification]
