@@ -149,58 +149,169 @@ def _extract_error_lines(logs: str, max_lines: int = 20) -> list[str]:
     return error_lines[:max_lines]
 
 
-def _llm_classify(logs: str, partial_type: str) -> FailureClassification:
+def _llm_classify(
+    logs: str,
+    partial_type: str
+) -> FailureClassification:
     """
-    Use Gemini Flash to classify when deterministic matching is insufficient.
-    Returns a FailureClassification dict.
+    Use Gemini or OpenRouter to classify failures.
     """
+
     try:
-        import google.generativeai as genai
-
-        if not settings.gemini_api_key:
-            raise ValueError("No Gemini API key configured")
-
-        genai.configure(api_key=settings.gemini_api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")
-
-        error_excerpt = "\n".join(_extract_error_lines(logs))
+        error_excerpt = "\n".join(
+            _extract_error_lines(logs)
+        )
 
         prompt = f"""You are a DevOps expert analyzing a CI/CD pipeline failure.
 
 Analyze this failure log excerpt and classify the root cause.
 
-FAILURE LOG (key lines only):
+FAILURE LOG:
 {error_excerpt[:3000]}
 
-Respond ONLY with a valid JSON object (no markdown, no explanation) with this exact structure:
-{{
-  "failure_type": "<one of: missing_env_var|dep_conflict|import_error|test_failure|docker_build_failure|ts_build_error|npm_dep_conflict|syntax_error|unknown>",
-  "language": "<one of: python|node|docker|generic>",
-  "affected_files": ["list of file paths mentioned"],
-  "error_messages": ["key error messages extracted"],
-  "confidence": 0.85,
-  "reasoning": "Brief explanation of root cause"
-}}"""
+Respond ONLY with valid JSON:
 
-        response = model.generate_content(prompt)
-        text = response.text.strip()
+{{
+  "failure_type": "missing_env_var|dep_conflict|import_error|test_failure|docker_build_failure|ts_build_error|npm_dep_conflict|syntax_error|unknown",
+  "language": "python|node|docker|generic",
+  "affected_files": ["list of files"],
+  "error_messages": ["important errors"],
+  "confidence": 0.85,
+  "reasoning": "brief explanation"
+}}
+"""
+
+        # ─────────────────────────────
+        # Gemini
+        # ─────────────────────────────
+        if settings.gemini_api_key:
+            import google.generativeai as genai
+
+            genai.configure(
+                api_key=settings.gemini_api_key
+            )
+
+            model = genai.GenerativeModel(
+                settings.llm_model
+            )
+
+            response = model.generate_content(
+                prompt
+            )
+
+            text = response.text.strip()
+
+        # ─────────────────────────────
+        # OpenRouter fallback
+        # ─────────────────────────────
+        elif settings.openrouter_api_key:
+            import requests
+
+            response = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization":
+                        f"Bearer {settings.openrouter_api_key}",
+                    "Content-Type":
+                        "application/json",
+                },
+                json={
+                    "model":
+                        settings.llm_model,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": prompt,
+                        }
+                    ],
+                },
+                timeout=60,
+            )
+
+            response.raise_for_status()
+
+            text = (
+                response.json()["choices"][0]
+                ["message"]["content"]
+                .strip()
+            )
+
+        elif settings.groq_api_key:
+            import requests
+            
+            response = requests.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={
+                    "Authorization":
+                        f"Bearer {settings.groq_api_key}",
+                    "Content-Type":
+                        "application/json",
+                },
+                json={
+                    "model":
+                        settings.llm_model,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    "temperature": 0.1,
+                },
+                timeout=60,
+            )
+
+            response.raise_for_status()
+
+            text = (
+                response.json()["choices"][0]
+                ["message"]["content"]
+                .strip()
+            )
+
+        else:
+            raise ValueError(
+                "No LLM provider configured"
+            )
+
+        # Strip markdown wrappers
         if text.startswith("```"):
             text = text.split("```")[1]
+
             if text.startswith("json"):
                 text = text[4:]
-        return json.loads(text.strip())
+
+        return json.loads(
+            text.strip()
+        )
 
     except Exception as e:
-        logger.warning(f"[RCAAgent] LLM classification failed: {e}, using heuristic fallback")
-        return {
-            "failure_type": partial_type or "unknown",
-            "language": "generic",
-            "affected_files": [],
-            "error_messages": _extract_error_lines(logs, 5),
-            "confidence": 0.40,
-            "reasoning": "Classified by heuristic fallback due to LLM unavailability",
-        }
+        logger.warning(
+            "[RCAAgent] "
+            f"LLM classification failed: {e}, "
+            "using heuristic fallback"
+        )
 
+        return {
+            "failure_type":
+                partial_type
+                or "unknown",
+            "language":
+                "generic",
+            "affected_files":
+                [],
+            "error_messages":
+                _extract_error_lines(
+                    logs,
+                    5
+                ),
+            "confidence":
+                0.40,
+            "reasoning":
+                "Classified by heuristic "
+                "fallback due to "
+                "LLM unavailability",
+        }
 
 def rca_agent(state: WorkflowState) -> WorkflowState:
     """RCA agent node for LangGraph."""

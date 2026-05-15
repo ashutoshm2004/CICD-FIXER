@@ -58,7 +58,7 @@ def intake_agent(state: WorkflowState) -> WorkflowState:
         os.makedirs(workspace_path, exist_ok=True)
 
         # Write raw logs to workspace for reference
-        with open(os.path.join(workspace_path, "failure.log"), "w") as f:
+        with open(os.path.join(workspace_path, "failure.log"), "w", encoding="utf-8") as f:
             f.write(new_state["raw_logs"])
 
         new_state["workspace_path"] = workspace_path

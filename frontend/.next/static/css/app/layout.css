@@ -641,6 +641,9 @@ video {
 .ml-1 {
   margin-left: 0.25rem;
 }
+.ml-6 {
+  margin-left: 1.5rem;
+}
 .mr-2 {
   margin-right: 0.5rem;
 }
@@ -783,6 +786,9 @@ video {
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+.cursor-pointer {
+  cursor: pointer;
+}
 .select-none {
   -webkit-user-select: none;
      -moz-user-select: none;
@@ -924,6 +930,14 @@ video {
   --tw-border-opacity: 1;
   border-color: rgb(30 64 175 / var(--tw-border-opacity, 1));
 }
+.border-brand-500 {
+  --tw-border-opacity: 1;
+  border-color: rgb(14 165 233 / var(--tw-border-opacity, 1));
+}
+.border-brand-600 {
+  --tw-border-opacity: 1;
+  border-color: rgb(2 132 199 / var(--tw-border-opacity, 1));
+}
 .border-brand-900 {
   --tw-border-opacity: 1;
   border-color: rgb(12 74 110 / var(--tw-border-opacity, 1));
@@ -1006,6 +1020,9 @@ video {
   --tw-bg-opacity: 1;
   background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1));
 }
+.bg-gray-800\/40 {
+  background-color: rgb(31 41 55 / 0.4);
+}
 .bg-gray-800\/60 {
   background-color: rgb(31 41 55 / 0.6);
 }
@@ -1018,6 +1035,9 @@ video {
 }
 .bg-gray-950\/80 {
   background-color: rgb(3 7 18 / 0.8);
+}
+.bg-green-900\/10 {
+  background-color: rgb(20 83 45 / 0.1);
 }
 .bg-green-900\/20 {
   background-color: rgb(20 83 45 / 0.2);
@@ -1073,6 +1093,10 @@ video {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 }
+.px-2\.5 {
+  padding-left: 0.625rem;
+  padding-right: 0.625rem;
+}
 .px-3 {
   padding-left: 0.75rem;
   padding-right: 0.75rem;
@@ -1115,6 +1139,9 @@ video {
 }
 .pb-4 {
   padding-bottom: 1rem;
+}
+.pt-1 {
+  padding-top: 0.25rem;
 }
 .pt-2 {
   padding-top: 0.5rem;
@@ -1261,6 +1288,9 @@ video {
   --tw-placeholder-opacity: 1;
   color: rgb(71 85 105 / var(--tw-placeholder-opacity, 1));
 }
+.accent-brand-500 {
+  accent-color: #0ea5e9;
+}
 .filter {
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
@@ -1277,6 +1307,11 @@ video {
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
+}
+
+.hover\:border-gray-600:hover {
+  --tw-border-opacity: 1;
+  border-color: rgb(75 85 99 / var(--tw-border-opacity, 1));
 }
 
 .hover\:border-gray-700:hover {

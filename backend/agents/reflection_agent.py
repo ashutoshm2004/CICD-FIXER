@@ -54,45 +54,153 @@ def _analyze_failure(state: WorkflowState) -> str:
     )
 
 
-def _llm_reflect(state: WorkflowState, failure_summary: str) -> str:
+def _llm_reflect(
+    state: WorkflowState,
+    failure_summary: str
+) -> str:
     """
-    Use Gemini Flash to understand why the fix failed and suggest an alternative.
-    Returns a hint to be added to the state for the next fix attempt.
+    Use Gemini or OpenRouter to
+    analyze failed fixes and
+    suggest retry strategies.
     """
+
     try:
-        import google.generativeai as genai
-        if not settings.gemini_api_key:
-            raise ValueError("No Gemini API key")
+        classification = state.get(
+            "parsed_failure",
+            {}
+        )
 
-        genai.configure(api_key=settings.gemini_api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        original_fix = state.get(
+            "proposed_fix",
+            {}
+        )
 
-        classification = state.get("parsed_failure", {})
-        original_fix = state.get("proposed_fix", {})
-
-        prompt = f"""You are a senior DevOps engineer debugging a CI/CD fix that didn't work.
+        prompt = f"""You are a senior DevOps engineer debugging a failed CI/CD fix.
 
 ORIGINAL PROBLEM:
 Type: {classification.get('failure_type', 'unknown')}
 Language: {classification.get('language', 'generic')}
 
-ORIGINAL FIX ATTEMPTED:
+ORIGINAL FIX:
 {json.dumps(original_fix, indent=2)[:1000]}
 
 WHY IT FAILED:
 {failure_summary}
 
-Suggest a DIFFERENT fix strategy in 2-3 sentences. Be concrete about what to try next.
-Do not repeat the same approach. Focus on the most likely alternative fix.
-Return ONLY the suggestion text, no JSON, no markdown."""
+Suggest a DIFFERENT fix strategy in 2–3 concise sentences.
 
-        response = model.generate_content(prompt)
-        return response.text.strip()
+Do NOT repeat the same fix.
+Be concrete and practical.
+
+Return ONLY plain text.
+"""
+
+        # ─────────────────────────────
+        # Gemini
+        # ─────────────────────────────
+        if settings.gemini_api_key:
+            import google.generativeai as genai
+
+            genai.configure(
+                api_key=settings.gemini_api_key
+            )
+
+            model = genai.GenerativeModel(
+                settings.llm_model
+            )
+
+            response = model.generate_content(
+                prompt
+            )
+
+            text = response.text.strip()
+
+        # ─────────────────────────────
+        # OpenRouter fallback
+        # ─────────────────────────────
+        elif settings.openrouter_api_key:
+            import requests
+
+            response = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization":
+                        f"Bearer {settings.openrouter_api_key}",
+                    "Content-Type":
+                        "application/json",
+                },
+                json={
+                    "model":
+                        settings.llm_model,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": prompt,
+                        }
+                    ],
+                },
+                timeout=60,
+            )
+
+            response.raise_for_status()
+
+            text = (
+                response.json()["choices"][0]
+                ["message"]["content"]
+                .strip()
+            )
+
+        elif settings.groq_api_key:
+            import requests
+
+            response = requests.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={
+                    "Authorization":
+                        f"Bearer {settings.groq_api_key}",
+                    "Content-Type":
+                        "application/json",
+                },
+                json={
+                    "model":
+                        settings.llm_model,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    "temperature": 0.1,
+                },
+                timeout=60,
+            )
+
+            response.raise_for_status()
+
+            text = (
+                response.json()["choices"][0]
+                ["message"]["content"]
+                .strip()
+            )
+
+        else:
+            raise ValueError(
+                "No LLM provider configured"
+            )
+
+        return text
 
     except Exception as e:
-        logger.warning(f"[ReflectionAgent] LLM reflection failed: {e}")
-        return "Try alternative approach: review the error output manually and adjust the fix accordingly."
+        logger.warning(
+            "[ReflectionAgent] "
+            f"LLM reflection failed: {e}"
+        )
 
+        return (
+            "Try an alternative "
+            "approach and review "
+            "validation logs manually."
+        )
 
 def should_retry(state: WorkflowState) -> str:
     """

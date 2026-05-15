@@ -40,6 +40,9 @@ export default function RootLayout({
               >
                 Workflows
               </a>
+              <a href="/connect" className="px-3 py-1.5 text-sm text-slate-400 hover:text-white rounded-lg hover:bg-gray-800 transition-colors">
+                🔗 Connect Repo
+              </a>
               <a
                 href="/demo"
                 className="px-3 py-1.5 text-sm bg-brand-600 hover:bg-brand-500 text-white rounded-lg transition-colors font-medium"

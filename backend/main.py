@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from config import settings
 from database import init_db
-from routers import webhook_router, workflows_router, demo_router
+from routers import webhook_router, workflows_router, demo_router, repo_router
 
 # ── Logging setup ────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -59,7 +59,9 @@ async def lifespan(app: FastAPI):
     if settings.gemini_api_key:
         logger.info(f"[Startup] LLM: Gemini ({settings.llm_model})")
     elif settings.openrouter_api_key:
-        logger.info("[Startup] LLM: OpenRouter (fallback)")
+        logger.info(f"[Startup] LLM: OpenRouter ({settings.llm_model})")
+    elif settings.groq_api_key:
+        logger.info(f"[Startup] LLM: Groq ({settings.llm_model})")
     else:
         logger.warning("[Startup] No LLM API key set — deterministic-only mode")
 
@@ -103,6 +105,7 @@ app.add_middleware(
 app.include_router(webhook_router)
 app.include_router(workflows_router)
 app.include_router(demo_router)
+app.include_router(repo_router)
 
 
 # ── Core endpoints ────────────────────────────────────────────────────────────
