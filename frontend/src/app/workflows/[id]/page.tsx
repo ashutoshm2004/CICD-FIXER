@@ -1,9 +1,20 @@
 import { getWorkflow } from "@/lib/api";
+
 import AgentTimeline from "@/components/AgentTimeline";
 import DiffViewer from "@/components/DiffViewer";
 import IncidentReport from "@/components/IncidentReport";
 import LogViewer from "@/components/LogViewer";
 import StatusBadge from "@/components/StatusBadge";
+
+import {
+  ArrowLeft,
+  Github,
+  Sparkles,
+  ShieldCheck,
+  Radar,
+  Terminal,
+} from "lucide-react";
+
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +26,7 @@ export default async function WorkflowDetailPage({
   params: { id: string };
 }) {
   let workflow;
+
   try {
     workflow = await getWorkflow(params.id);
   } catch {
@@ -27,163 +39,698 @@ export default async function WorkflowDetailPage({
   const report = workflow.incident_report;
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="flex items-start gap-4">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-xl font-bold text-white truncate">
-              {workflow.repo_name}
-            </h1>
-            <StatusBadge status={workflow.status} />
-            {workflow.scenario_name && (
-              <span className="badge bg-purple-900/40 text-purple-400 border border-purple-800">
-                {workflow.scenario_name}
-              </span>
-            )}
-          </div>
-          <p className="text-slate-400 text-sm mt-1 font-mono">
-            {workflow.id}
-          </p>
-          <div className="flex gap-4 mt-2 text-xs text-slate-500">
-            <span>Branch: <span className="text-slate-300">{workflow.branch}</span></span>
-            <span>Trigger: <span className="text-slate-300">{workflow.trigger_event}</span></span>
-            <span>Retries: <span className="text-slate-300">{workflow.retry_count}</span></span>
-            {workflow.confidence_score != null && (
-              <span>
-                Confidence:{" "}
-                <span className="text-brand-400 font-medium">
-                  {Math.round(workflow.confidence_score * 100)}%
-                </span>
-              </span>
-            )}
-          </div>
-        </div>
+    <div className="space-y-8 max-w-7xl mx-auto">
 
-        <div className="flex gap-2 flex-shrink-0">
-          {workflow.pull_request_url && (
-            <a
-              href={workflow.pull_request_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary text-sm"
+      {/* ================================================= */}
+      {/* HERO */}
+      {/* ================================================= */}
+
+      <section
+        className="
+          relative overflow-hidden
+          rounded-[36px]
+          border border-white/[0.06]
+          bg-black/40
+          backdrop-blur-2xl
+          p-8 lg:p-10
+        "
+      >
+
+        {/* glow */}
+        <div
+          className="
+            absolute inset-0
+            bg-[radial-gradient(circle_at_top_left,rgba(255,80,20,0.12),transparent_35%)]
+          "
+        />
+
+        <div className="relative z-10 flex flex-col xl:flex-row xl:items-start justify-between gap-10">
+
+          {/* LEFT */}
+          <div className="flex items-start gap-6 flex-1">
+
+            {/* icon */}
+            <div
+              className="
+                w-20 h-20
+                rounded-[28px]
+                border border-orange-500/15
+                bg-orange-500/10
+                flex items-center justify-center
+                shrink-0
+              "
             >
-              🔀 View PR
-            </a>
-          )}
-          <a href="/workflows" className="btn-ghost text-sm">
-            ← Back
-          </a>
-        </div>
-      </div>
 
-      {/* Root Cause */}
-      {failure && (
-        <div className="card space-y-3">
-          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
-            🔍 Root Cause Analysis
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            <span className="badge bg-orange-900/40 text-orange-400 border border-orange-800">
-              {failure.failure_type.replace(/_/g, " ")}
-            </span>
-            <span className="badge bg-blue-900/40 text-blue-400 border border-blue-800">
-              {failure.language}
-            </span>
-            <span className="badge bg-gray-800 text-slate-300 border border-gray-700">
-              {Math.round(failure.confidence * 100)}% confidence
-            </span>
+              <Radar
+                size={38}
+                className="text-orange-300"
+              />
+
+            </div>
+
+            <div className="min-w-0 flex-1">
+
+              {/* top chips */}
+              <div className="flex flex-wrap items-center gap-4 mb-6">
+
+                <div
+                  className="
+                    inline-flex items-center gap-2
+                    rounded-full
+                    border border-emerald-400/20
+                    bg-emerald-400/10
+                    px-4 py-2
+                  "
+                >
+
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+
+                  <span
+                    className="
+                      text-[11px]
+                      uppercase
+                      tracking-[0.2em]
+                      text-emerald-300
+                      font-semibold
+                    "
+                  >
+                    RECOVERED
+                  </span>
+                </div>
+
+                {workflow.scenario_name && (
+                  <div
+                    className="
+                      rounded-full
+                      border border-orange-500/15
+                      bg-orange-500/10
+                      px-4 py-2
+                      text-[11px]
+                      uppercase
+                      tracking-[0.22em]
+                      text-orange-200
+                    "
+                  >
+                    {workflow.scenario_name}
+                  </div>
+                )}
+
+              </div>
+
+              {/* title */}
+              <h1
+                className="
+                  text-[3rem]
+                  lg:text-[4rem]
+                  leading-[0.92]
+                  font-black
+                  tracking-[-0.06em]
+                  text-white
+                  break-words
+                "
+              >
+                {workflow.repo_name}
+              </h1>
+
+              {/* workflow id */}
+              <p
+                className="
+                  mt-5
+                  text-sm
+                  text-zinc-600
+                  font-mono
+                  break-all
+                "
+              >
+                {workflow.id}
+              </p>
+
+              {/* metadata */}
+              <div className="mt-7 flex flex-wrap gap-5">
+
+                <div
+                  className="
+                    rounded-2xl
+                    border border-white/[0.06]
+                    bg-white/[0.03]
+                    px-5 py-4
+                  "
+                >
+
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-600">
+                    Branch
+                  </p>
+
+                  <p className="mt-2 text-white font-semibold">
+                    {workflow.branch}
+                  </p>
+
+                </div>
+
+                <div
+                  className="
+                    rounded-2xl
+                    border border-white/[0.06]
+                    bg-white/[0.03]
+                    px-5 py-4
+                  "
+                >
+
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-600">
+                    Trigger
+                  </p>
+
+                  <p className="mt-2 text-white font-semibold">
+                    {workflow.trigger_event}
+                  </p>
+
+                </div>
+
+                <div
+                  className="
+                    rounded-2xl
+                    border border-white/[0.06]
+                    bg-white/[0.03]
+                    px-5 py-4
+                  "
+                >
+
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-600">
+                    Confidence
+                  </p>
+
+                  <p className="mt-2 text-orange-300 font-black text-xl">
+                    {workflow.confidence_score != null
+                      ? `${Math.round(
+                          workflow.confidence_score * 100
+                        )}%`
+                      : "--"}
+                  </p>
+
+                </div>
+              </div>
+            </div>
           </div>
-          <p className="text-sm text-slate-300">{failure.reasoning}</p>
+
+          {/* RIGHT */}
+          <div className="flex flex-col gap-4">
+
+            {/* PR */}
+            {workflow.pull_request_url && (
+
+              <a
+                href={workflow.pull_request_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+                  group
+                  relative overflow-hidden
+                  rounded-3xl
+                  border border-white/[0.08]
+                  bg-white/[0.03]
+                  p-6
+                  transition-all duration-300
+                  hover:border-orange-400/30
+                  hover:bg-orange-500/10
+                  hover:shadow-[0_0_40px_rgba(255,120,40,0.18)]
+                "
+              >
+
+                <div className="flex items-center gap-5">
+
+                  <div
+                    className="
+                      w-14 h-14
+                      rounded-2xl
+                      border border-white/[0.08]
+                      bg-black/40
+                      flex items-center justify-center
+                    "
+                  >
+
+                    <Github
+                      size={26}
+                      className="text-white"
+                    />
+
+                  </div>
+
+                  <div>
+
+                    <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-600">
+                      Pull Request
+                    </p>
+
+                    <h3 className="mt-2 text-white font-semibold">
+                      Autonomous Fix Commit
+                    </h3>
+
+                  </div>
+                </div>
+              </a>
+            )}
+
+            {/* back */}
+            <a
+              href="/workflows"
+              className="
+                rounded-2xl
+                border border-white/[0.06]
+                bg-white/[0.03]
+                px-5 py-4
+                flex items-center gap-3
+                text-zinc-400
+                transition-all duration-300
+                hover:border-orange-500/20
+                hover:bg-orange-500/5
+                hover:text-white
+              "
+            >
+
+              <ArrowLeft size={18} />
+
+              Back to Pipelines
+
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ================================================= */}
+      {/* RCA */}
+      {/* ================================================= */}
+
+      {failure && (
+
+        <section
+          className="
+            rounded-[34px]
+            border border-white/[0.06]
+            bg-black/30
+            backdrop-blur-2xl
+            p-8
+          "
+        >
+
+          <div className="flex items-center gap-3 mb-8">
+
+            <div
+              className="
+                w-12 h-12
+                rounded-2xl
+                border border-orange-500/15
+                bg-orange-500/10
+                flex items-center justify-center
+              "
+            >
+
+              <Terminal
+                size={22}
+                className="text-orange-300"
+              />
+
+            </div>
+
+            <div>
+
+              <p className="text-[10px] uppercase tracking-[0.25em] text-zinc-600">
+                Diagnostics
+              </p>
+
+              <h2 className="mt-1 text-2xl font-black text-white">
+                Root Cause Analysis
+              </h2>
+
+            </div>
+          </div>
+
+          {/* chips */}
+          <div className="flex flex-wrap gap-3">
+
+            <div
+              className="
+                rounded-full
+                border border-orange-500/15
+                bg-orange-500/10
+                px-5 py-2
+                text-xs uppercase tracking-[0.2em]
+                text-orange-200
+              "
+            >
+              {failure.failure_type.replace(/_/g, " ")}
+            </div>
+
+            <div
+              className="
+                rounded-full
+                border border-blue-500/15
+                bg-blue-500/10
+                px-5 py-2
+                text-xs uppercase tracking-[0.2em]
+                text-blue-200
+              "
+            >
+              {failure.language}
+            </div>
+
+            <div
+              className="
+                rounded-full
+                border border-white/[0.08]
+                bg-white/[0.03]
+                px-5 py-2
+                text-xs uppercase tracking-[0.2em]
+                text-zinc-400
+              "
+            >
+              {Math.round(failure.confidence * 100)}% confidence
+            </div>
+          </div>
+
+          {/* reasoning */}
+          <p className="mt-8 text-zinc-400 leading-relaxed text-lg">
+            {failure.reasoning}
+          </p>
+
+          {/* logs */}
           {failure.error_messages.length > 0 && (
-            <div className="bg-gray-950 rounded-lg p-3 space-y-1">
-              {failure.error_messages.slice(0, 3).map((msg, i) => (
-                <p key={i} className="mono text-red-400 text-xs">
-                  {msg}
-                </p>
-              ))}
+
+            <div
+              className="
+                mt-8
+                rounded-3xl
+                border border-red-500/10
+                bg-black/50
+                p-5
+                space-y-3
+              "
+            >
+
+              {failure.error_messages
+                .slice(0, 3)
+                .map((msg, i) => (
+
+                  <div
+                    key={i}
+                    className="
+                      rounded-2xl
+                      border border-white/[0.05]
+                      bg-white/[0.02]
+                      px-4 py-3
+                      font-mono text-sm
+                      text-red-300
+                      overflow-x-auto
+                    "
+                  >
+                    {msg}
+                  </div>
+                ))}
             </div>
           )}
-        </div>
+        </section>
       )}
 
-      {/* Two-column: fix + validation */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Proposed Fix */}
+      {/* ================================================= */}
+      {/* FIX + VALIDATION */}
+      {/* ================================================= */}
+
+      <section className="grid xl:grid-cols-2 gap-6">
+
+        {/* FIX */}
         {fix && (
-          <div className="card space-y-3">
-            <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
-              🔧 Proposed Fix
-            </h2>
-            <p className="text-sm text-slate-300">{fix.strategy}</p>
+
+          <div
+            className="
+              rounded-[34px]
+              border border-white/[0.06]
+              bg-black/30
+              backdrop-blur-2xl
+              p-8
+            "
+          >
+
+            <div className="flex items-center gap-3 mb-7">
+
+              <div
+                className="
+                  w-12 h-12
+                  rounded-2xl
+                  border border-orange-500/15
+                  bg-orange-500/10
+                  flex items-center justify-center
+                "
+              >
+
+                <Sparkles
+                  size={22}
+                  className="text-orange-300"
+                />
+
+              </div>
+
+              <div>
+
+                <p className="text-[10px] uppercase tracking-[0.25em] text-zinc-600">
+                  Autonomous Patch
+                </p>
+
+                <h2 className="mt-1 text-2xl font-black text-white">
+                  Proposed Fix
+                </h2>
+
+              </div>
+            </div>
+
+            <p className="text-zinc-400 leading-relaxed mb-8">
+              {fix.strategy}
+            </p>
+
             <DiffViewer patches={fix.patches} />
+
           </div>
         )}
 
-        {/* Validation */}
+        {/* VALIDATION */}
         {validation && (
-          <div className="card space-y-3">
-            <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
-              ✅ Validation
-            </h2>
-            <div className="flex items-center gap-2">
-              <span
-                className={`badge border ${
-                  validation.passed
-                    ? "bg-green-900/40 text-green-400 border-green-800"
-                    : "bg-red-900/40 text-red-400 border-red-800"
-                }`}
+
+          <div
+            className="
+              rounded-[34px]
+              border border-white/[0.06]
+              bg-black/30
+              backdrop-blur-2xl
+              p-8
+            "
+          >
+
+            <div className="flex items-center gap-3 mb-7">
+
+              <div
+                className="
+                  w-12 h-12
+                  rounded-2xl
+                  border border-cyan-500/15
+                  bg-cyan-500/10
+                  flex items-center justify-center
+                "
               >
-                {validation.passed ? "PASSED" : "FAILED"}
-              </span>
+
+                <ShieldCheck
+                  size={22}
+                  className="text-cyan-300"
+                />
+
+              </div>
+
+              <div>
+
+                <p className="text-[10px] uppercase tracking-[0.25em] text-zinc-600">
+                  Verification
+                </p>
+
+                <h2 className="mt-1 text-2xl font-black text-white">
+                  Recovery Validation
+                </h2>
+
+              </div>
             </div>
-            <p className="text-sm text-slate-400">{validation.summary}</p>
-            <div className="space-y-2 max-h-48 overflow-y-auto scrollbar-thin">
+
+            {/* status */}
+            <div
+              className={`
+                inline-flex items-center gap-3
+                rounded-full
+                px-5 py-3
+                border
+                ${
+                  validation.passed
+                    ? "border-cyan-400/20 bg-cyan-400/10"
+                    : "border-red-400/20 bg-red-400/10"
+                }
+              `}
+            >
+
+              <div
+                className={`
+                  w-2 h-2 rounded-full animate-pulse
+                  ${
+                    validation.passed
+                      ? "bg-cyan-400"
+                      : "bg-red-400"
+                  }
+                `}
+              />
+
+              <span
+                className={`
+                  text-xs uppercase tracking-[0.22em] font-semibold
+                  ${
+                    validation.passed
+                      ? "text-cyan-300"
+                      : "text-red-300"
+                  }
+                `}
+              >
+                {validation.passed
+                  ? "VERIFIED"
+                  : "FAILED"}
+              </span>
+
+            </div>
+
+            <p className="mt-7 text-zinc-400 leading-relaxed">
+              {validation.summary}
+            </p>
+
+            {/* commands */}
+            <div className="mt-8 space-y-3 max-h-[320px] overflow-y-auto">
+
               {validation.commands_run.map((cmd, i) => (
-                <div key={i} className="bg-gray-950 rounded p-2">
-                  <p className="mono text-xs text-slate-500">$ {cmd.command}</p>
-                  <p
-                    className={`mono text-xs mt-0.5 ${
-                      cmd.returncode === 0 ? "text-green-400" : "text-red-400"
-                    }`}
-                  >
-                    exit {cmd.returncode}
+
+                <div
+                  key={i}
+                  className="
+                    rounded-2xl
+                    border border-white/[0.06]
+                    bg-white/[0.03]
+                    p-4
+                  "
+                >
+
+                  <p className="font-mono text-sm text-zinc-500">
+                    $ {cmd.command}
                   </p>
+
+                  <div className="mt-3 flex items-center gap-2">
+
+                    <div
+                      className={`
+                        w-2 h-2 rounded-full
+                        ${
+                          cmd.returncode === 0
+                            ? "bg-emerald-400"
+                            : "bg-red-400"
+                        }
+                      `}
+                    />
+
+                    <span
+                      className={`
+                        text-xs uppercase tracking-[0.2em]
+                        ${
+                          cmd.returncode === 0
+                            ? "text-emerald-300"
+                            : "text-red-300"
+                        }
+                      `}
+                    >
+                      exit {cmd.returncode}
+                    </span>
+
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         )}
-      </div>
+      </section>
 
-      {/* Agent Timeline */}
-      {workflow.agent_trace && workflow.agent_trace.length > 0 && (
-        <div className="card space-y-3">
-          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
-            ⏱ Agent Timeline
-          </h2>
-          <AgentTimeline events={workflow.agent_trace} />
-        </div>
-      )}
+      {/* ================================================= */}
+      {/* TIMELINE */}
+      {/* ================================================= */}
 
-      {/* Raw Logs */}
+      {workflow.agent_trace &&
+        workflow.agent_trace.length > 0 && (
+
+          <section
+            className="
+              rounded-[34px]
+              border border-white/[0.06]
+              bg-black/30
+              backdrop-blur-2xl
+              p-8
+            "
+          >
+
+            <h2 className="text-3xl font-black text-white mb-8">
+              Autonomous Timeline
+            </h2>
+
+            <AgentTimeline
+              events={workflow.agent_trace}
+            />
+
+          </section>
+        )}
+
+      {/* ================================================= */}
+      {/* LOGS */}
+      {/* ================================================= */}
+
       {workflow.raw_logs && (
-        <div className="card space-y-3">
-          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
-            📋 Raw CI/CD Logs
+
+        <section
+          className="
+            rounded-[34px]
+            border border-white/[0.06]
+            bg-black/30
+            backdrop-blur-2xl
+            p-8
+          "
+        >
+
+          <h2 className="text-3xl font-black text-white mb-8">
+            CI/CD Logs
           </h2>
+
           <LogViewer logs={workflow.raw_logs} />
-        </div>
+
+        </section>
       )}
 
-      {/* Incident Report */}
+      {/* ================================================= */}
+      {/* REPORT */}
+      {/* ================================================= */}
+
       {report && (
-        <div className="card space-y-3">
-          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
-            📝 Incident Report
+
+        <section
+          className="
+            rounded-[34px]
+            border border-white/[0.06]
+            bg-black/30
+            backdrop-blur-2xl
+            p-8
+          "
+        >
+
+          <h2 className="text-3xl font-black text-white mb-8">
+            Incident Report
           </h2>
+
           <IncidentReport report={report} />
-        </div>
+
+        </section>
       )}
     </div>
   );
