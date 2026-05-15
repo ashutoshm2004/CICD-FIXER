@@ -1,0 +1,6 @@
+{
+  "/workflows/[id]/page": "app/workflows/[id]/page.js",
+  "/demo/page": "app/demo/page.js",
+  "/page": "app/page.js",
+  "/workflows/page": "app/workflows/page.js"
+}

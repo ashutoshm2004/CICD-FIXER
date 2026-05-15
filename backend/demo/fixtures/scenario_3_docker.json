@@ -1,0 +1,11 @@
+{
+  "name": "Docker Build Failure",
+  "description": "Docker build fails because COPY references a file that doesn't exist",
+  "repo_name": "acme-corp/checkout-service",
+  "repo_owner": "acme-corp",
+  "branch": "main",
+  "commit_sha": "c3d4e5f6",
+  "expected_failure_type": "docker_build_failure",
+  "expected_fix": "Fix COPY instruction in Dockerfile to reference correct path",
+  "logs": "##[group]Run docker build -t checkout-service .\n##[command]docker build -t checkout-service .\n[+] Building 12.4s (8/14)\n => [internal] load build definition from Dockerfile\n => [internal] load .dockerignore\n => [internal] load metadata for docker.io/library/python:3.11-slim\n => [1/6] FROM docker.io/library/python:3.11-slim\n => [2/6] WORKDIR /app\n => [3/6] COPY requirements.txt .\n => [4/6] RUN pip install -r requirements.txt\n => ERROR [5/6] COPY ./config/production.yaml /app/config/\n------\n > [5/6] COPY ./config/production.yaml /app/config/:\n------\nDockerfile:12\n--------------------\n  11 | COPY requirements.txt .\n  12 | >>> COPY ./config/production.yaml /app/config/\n  13 | RUN pip install -r requirements.txt\n--------------------\nERROR: failed to solve: failed to compute cache key: failed to calculate checksum of ref: \"config/production.yaml\": not found\nCOPY failed: file not found in BUILD context or excluded by .dockerignore: stat config/production.yaml: file does not exist\n##[error]Process completed with exit code 1.\n##[endgroup]\n\nError: Process completed with exit code 1"
+}

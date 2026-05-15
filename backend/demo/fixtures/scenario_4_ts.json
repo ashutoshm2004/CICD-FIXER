@@ -1,0 +1,11 @@
+{
+  "name": "TypeScript Build Error",
+  "description": "Next.js TypeScript build fails due to type mismatch",
+  "repo_name": "acme-corp/dashboard-ui",
+  "repo_owner": "acme-corp",
+  "branch": "feature/new-table",
+  "commit_sha": "d4e5f6g7",
+  "expected_failure_type": "ts_build_error",
+  "expected_fix": "Fix type annotation in DataTable component",
+  "logs": "##[group]Run npm run build\n##[command]npm run build\n> dashboard-ui@1.0.0 build\n> next build\n\n   Creating an optimized production build ...\n\nFailed to compile.\n\n./src/components/DataTable.tsx\nTypeScript error in ./src/components/DataTable.tsx (42:17):\n\nerror TS2322: Type '{ data: UserRecord[]; columns: string[]; onSort: (col: string) => void; }' is not assignable to type 'IntrinsicAttributes & TableProps'.\n  Type '{ data: UserRecord[]; columns: string[]; onSort: (col: string) => void; }' is not assignable to type 'Readonly<TableProps>'.\n    Types of property 'data' are incompatible.\n      Type 'UserRecord[]' is not assignable to type 'Record<string, unknown>[]'.\n        Type 'UserRecord' is not assignable to type 'Record<string, unknown>'.\n          Index signature for type 'string' is missing in type 'UserRecord'.\n\n  40 |\n  41 |   return (\n> 42 |     <DataTable\n     |                 ^\n  43 |       data={users}\n  44 |       columns={columns}\n\nerror TS2339: Property 'email' does not exist on type 'Record<string, unknown>'\n\ninfo  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/pages/api-reference/config/eslint\n##[error]Process completed with exit code 1.\n##[endgroup]\n\nError: Process completed with exit code 1"
+}

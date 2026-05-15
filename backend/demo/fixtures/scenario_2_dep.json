@@ -1,0 +1,11 @@
+{
+  "name": "Broken Python Dependency",
+  "description": "pip install fails due to conflicting package versions",
+  "repo_name": "acme-corp/ml-pipeline",
+  "repo_owner": "acme-corp",
+  "branch": "feature/upgrade-torch",
+  "commit_sha": "b2c3d4e5",
+  "expected_failure_type": "dep_conflict",
+  "expected_fix": "Pin conflicting packages in requirements.txt",
+  "logs": "##[group]Run pip install -r requirements.txt\n##[command]pip install -r requirements.txt\nCollecting torch==2.3.0\n  Downloading torch-2.3.0-cp311-cp311-linux_x86_64.whl (779.1 MB)\nCollecting numpy==1.24.0\nCollecting scipy==1.11.0\nERROR: Cannot install torch==2.3.0 and numpy==1.24.0 because these package versions have conflicting dependencies.\n\nThe conflict is caused by:\n    torch 2.3.0 requires numpy>=1.26.0, but you have numpy 1.24.0 which is incompatible.\n\nTo fix this you could try to:\n1. loosen the range of package versions you've specified\n2. remove package versions to allow pip attempt to solve the dependency conflict\n\nERROR: ResolutionImpossible: for help visit https://pip.pypa.io/en/latest/topics/dependency-resolution/\n##[error]Process completed with exit code 1.\n##[endgroup]\n\nError: Process completed with exit code 1"
+}

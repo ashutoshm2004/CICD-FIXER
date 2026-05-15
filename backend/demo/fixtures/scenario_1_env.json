@@ -1,0 +1,11 @@
+{
+  "name": "Missing Environment Variable",
+  "description": "Python FastAPI app fails to start because DATABASE_URL is not set",
+  "repo_name": "acme-corp/api-service",
+  "repo_owner": "acme-corp",
+  "branch": "main",
+  "commit_sha": "a1b2c3d4",
+  "expected_failure_type": "missing_env_var",
+  "expected_fix": "Add DATABASE_URL to .env.example",
+  "logs": "##[group]Run python -m uvicorn main:app --host 0.0.0.0 --port 8000\n##[command]python -m uvicorn main:app --host 0.0.0.0 --port 8000\nINFO:     Started server process [1]\nINFO:     Waiting for application startup.\nERROR:    Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/starlette/routing.py\", line 693, in lifespan\n    async with self.lifespan_context(app) as state:\n  File \"/app/main.py\", line 24, in lifespan\n    db_url = os.environ[\"DATABASE_URL\"]\n  File \"<frozen os>\", line 679, in __getitem__\nKeyError: 'DATABASE_URL'\nERROR:    Application startup failed. Exiting.\n##[error]Process completed with exit code 1.\n##[endgroup]\n\nError: Process completed with exit code 1"
+}
