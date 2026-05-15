@@ -1,9 +1,9 @@
 {
   "pages": {
-    "/workflows/[id]/page": [
+    "/workflows/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/workflows/[id]/page.js"
+      "static/chunks/app/workflows/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
@@ -20,11 +20,6 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
-    ],
-    "/workflows/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/workflows/page.js"
     ]
   }
 }
