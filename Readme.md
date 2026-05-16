@@ -195,7 +195,7 @@ end
 | Frontend | Next.js 14 + Tailwind CSS |
 | Backend | FastAPI |
 | Orchestration | LangGraph |
-| LLM | Gemini Flash + OpenRouter Fallback |
+| LLM | GROQ + Gemini Flash Fallback + OpenRouter Fallback |
 | Database | SQLite |
 | Containerization | Docker Compose |
 | CI/CD Integration | GitHub API + Webhooks |
