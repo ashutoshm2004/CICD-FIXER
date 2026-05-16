@@ -1,5 +1,5 @@
 
-# 🚀 Autonomous CI/CD Failure Fixer
+# 🚀 ARGUS - Autonomous CI/CD Failure Fixer
 
 <div align="center">
 

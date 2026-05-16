@@ -5,3 +5,6 @@ dist
 build
 coverage
 *.log
+.next
+__pycache__
+*.pyc
